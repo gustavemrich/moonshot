@@ -178,5 +178,28 @@
 <script src="store.js"></script>
 <script src="discord.js"></script>
 <script src="app.js"></script>
+<script>
+/* Runs inline, so it still fires when the sibling files are missing —
+   e.g. when this page is opened straight from inside a ZIP. */
+(function () {
+  var missing = [];
+  if (!getComputedStyle(document.documentElement).getPropertyValue('--p1').trim()) missing.push('styles.css');
+  if (typeof window.MoonStore === 'undefined') missing.push('store.js');
+  if (typeof window.MoonDiscord === 'undefined') missing.push('discord.js');
+  if (!missing.length) return;
+
+  var bar = document.createElement('div');
+  bar.setAttribute('role', 'alert');
+  bar.style.cssText = 'position:fixed;inset:0 0 auto 0;z-index:9999;padding:18px 20px;' +
+    'font:15px/1.6 system-ui,sans-serif;color:#2a1605;background:#fcd34d;' +
+    'box-shadow:0 8px 30px rgba(0,0,0,.45);text-align:center';
+  bar.innerHTML = '<b>⚠️ This page is missing its files, so nothing on it works.</b><br>' +
+    "Looks like it was opened from inside the ZIP. Right-click the ZIP \u2192 <b>Extract All\u2026</b>, " +
+    'then open this page from the extracted folder.<br>' +
+    '<small style="opacity:.75">Not found: ' + missing.join(', ') + '</small>';
+  document.body.appendChild(bar);
+  document.body.style.paddingTop = '120px';
+})();
+</script>
 </body>
 </html>
