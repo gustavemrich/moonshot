@@ -286,6 +286,29 @@
     );
   }
 
+  /* ── 8b. contract address ──────────────────────────────── */
+  const caBtn = $('#ca-copy'), caBar = $('.ca-bar');
+  if (caBtn && caBar) {
+    const copyCA = async () => {
+      const addr = caBtn.dataset.ca || '';
+      if (!addr) return;
+      try {
+        await navigator.clipboard.writeText(addr);
+        caBar.classList.add('copied');
+        toast('Contract address copied');
+        setTimeout(() => caBar.classList.remove('copied'), 1600);
+      } catch {
+        /* clipboard can be blocked; select the text so it can be copied by hand */
+        const r = document.createRange();
+        r.selectNodeContents($('#ca-text'));
+        const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        toast('Copy blocked — the address is selected, press Ctrl+C');
+      }
+    };
+    caBtn.addEventListener('click', copyCA);
+    $('#ca-text').addEventListener('click', copyCA);
+  }
+
   /* ── 9. toast ──────────────────────────────────────────── */
   let toastT;
   function toast(msg) {
