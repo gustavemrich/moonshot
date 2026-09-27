@@ -6,6 +6,11 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const { load, esc, safeHref } = MoonStore;
 
+  /* a coin shows PENDING for this long after it is submitted,
+     then goes live on its own — no admin step needed */
+  const PENDING_MS = 60 * 1000;
+  const isLive = (coin) => Date.now() - Number(coin.at || 0) >= PENDING_MS;
+
   /* ── 1. starfield ──────────────────────────────────────── */
   const sky = $('#stars'), sctx = sky.getContext('2d');
   let stars = [], W = 0, H = 0, dpr = Math.min(devicePixelRatio || 1, 2);
@@ -56,7 +61,7 @@
   const statLaunched = $('#stat-launched');
   const seedStat = () => {
     if (!statLaunched) return;
-    const n = MoonStore.counts().launched;
+    const n = load().filter(isLive).length;
     statLaunched.dataset.to = n;
     if (statLaunched.dataset.done) statLaunched.textContent = n.toLocaleString();
   };
@@ -105,7 +110,7 @@
   /* ── 6. launch form ────────────────────────────────────── */
   const form = $('#launch-form'), drop = $('#drop'), file = $('#image'), preview = $('#preview');
   const nameI = $('#name'), tickI = $('#ticker'), descI = $('#desc');
-  const pv = { img: $('#pv-img'), name: $('#pv-name'), tick: $('#pv-ticker'), desc: $('#pv-desc'), links: $('#pv-links') };
+  const pv = { img: $('#pv-img'), name: $('#pv-name'), tick: $('#pv-ticker'), desc: $('#pv-desc') };
   let imageData = '';
 
   /* image → downscaled data URL (keeps localStorage small) */
@@ -153,16 +158,11 @@
       return href ? { href, icon, label } : null;
     }).filter(Boolean);
   }
-  function renderLinks(target, links) {
-    target.innerHTML = links.map(l =>
-      `<a href="${esc(l.href)}" target="_blank" rel="noopener noreferrer">${l.icon} ${l.label}</a>`).join('');
-  }
   function syncPreview() {
     pv.name.textContent = nameI.value.trim() || 'Your Coin';
     pv.tick.textContent = '$' + (tickI.value.trim().toUpperCase() || 'TICKER');
     pv.desc.textContent = descI.value.trim() || 'Your description shows up right here.';
     $('#desc-count').textContent = descI.value.length;
-    renderLinks(pv.links, currentLinks());
   }
   form.addEventListener('input', syncPreview);
   tickI.addEventListener('input', () => { tickI.value = tickI.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase(); });
@@ -185,15 +185,12 @@
       <div class="coin-top">
         <div class="coin-img">${coin.image ? `<img src="${esc(coin.image)}" alt="" />` : '<span>🌙</span>'}</div>
         <div><h3>${esc(coin.name)}</h3><p class="tick">$${esc(coin.ticker)}</p></div>
-        <span class="badge ${coin.status === 'launched' ? 'is-live' : 'is-pending'}">${coin.status === 'launched' ? 'LIVE' : 'PENDING'}</span>
+        <span class="badge"></span>
       </div>
       ${coin.desc ? `<p class="coin-desc">${esc(coin.desc)}</p>` : ''}
-      <div class="coin-links"></div>
       <div class="spark" aria-hidden="true">${'<i></i>'.repeat(12)}</div>`;
-    const links = [...(coin.links || [])];
-    if (coin.status === 'launched' && coin.launchUrl)
-      links.unshift({ href: coin.launchUrl, icon: '📈', label: 'Live' });
-    renderLinks($('.coin-links', el), links);
+    el.dataset.at = coin.at;
+    paintBadge(el);
     stagger(el);
     $('.del', el).addEventListener('click', () => {
       const list = load().filter(c => c.id !== coin.id);
@@ -201,6 +198,31 @@
     });
     return el;
   }
+  /* PENDING 0:42 → LIVE, ticked once a second */
+  function paintBadge(el) {
+    const badge = $('.badge', el);
+    if (!badge) return false;
+    const left = PENDING_MS - (Date.now() - Number(el.dataset.at || 0));
+
+    if (left <= 0) {
+      if (!badge.classList.contains('is-live')) {
+        badge.className = 'badge is-live just-live';
+        badge.textContent = 'LIVE';
+        el.classList.remove('is-waiting');
+        seedStat();
+        setTimeout(() => badge.classList.remove('just-live'), 900);
+      }
+      return false;
+    }
+    const secs = Math.ceil(left / 1000);
+    badge.className = 'badge is-pending';
+    badge.textContent = `PENDING ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+    el.classList.add('is-waiting');
+    return true;
+  }
+
+  setInterval(() => { $$('#coin-grid .coin').forEach(paintBadge); }, 1000);
+
   function render() {
     const list = load();
     grid.innerHTML = '';

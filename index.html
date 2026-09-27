@@ -116,7 +116,7 @@
         </div>
 
         <fieldset class="field links">
-          <legend>Links <span class="opt">optional</span></legend>
+          <legend>Links <span class="opt">optional · sent to Discord, not shown on the card</span></legend>
           <label class="ln"><span aria-hidden="true">🌐</span><input id="link-site" type="url" placeholder="https://yourcoin.xyz" /></label>
           <label class="ln"><span aria-hidden="true">𝕏</span><input id="link-x" type="text" placeholder="x.com/yourcoin" /></label>
           <label class="ln"><span aria-hidden="true">✈️</span><input id="link-tg" type="text" placeholder="t.me/yourcoin" /></label>
@@ -137,10 +137,9 @@
               <h3 id="pv-name">Your Coin</h3>
               <p class="tick" id="pv-ticker">$TICKER</p>
             </div>
-            <span class="badge">NEW</span>
+            <span class="badge is-pending">PENDING 1:00</span>
           </div>
           <p class="coin-desc" id="pv-desc">Your description shows up right here.</p>
-          <div class="coin-links" id="pv-links"></div>
           <div class="spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </article>
       </aside>
@@ -150,7 +149,7 @@
   <section id="board" class="board">
     <div class="section-head reveal">
       <h2>The <span class="grad">board</span></h2>
-      <p>Freshly launched coins, newest first.</p>
+      <p>Freshly launched coins, newest first. New ones go live after a minute.</p>
     </div>
     <div class="coin-grid" id="coin-grid"></div>
     <p class="empty" id="empty-state">No coins yet — <a href="#launch">be the first to launch</a>.</p>
@@ -161,8 +160,8 @@
     <ol class="steps">
       <li class="card step reveal"><span class="num">1</span><h3>Upload</h3><p>Pick an image that deserves to be a coin.</p></li>
       <li class="card step reveal" style="--d:.1s"><span class="num">2</span><h3>Name it</h3><p>Name, ticker, and a line of lore.</p></li>
-      <li class="card step reveal" style="--d:.2s"><span class="num">3</span><h3>Link it</h3><p>Site, X, Telegram — however you want to be found.</p></li>
-      <li class="card step reveal" style="--d:.3s"><span class="num">4</span><h3>Launch</h3><p>Hit the button. You're on the board. Free.</p></li>
+      <li class="card step reveal" style="--d:.2s"><span class="num">3</span><h3>Link it</h3><p>Site, X, Telegram — so we can reach you.</p></li>
+      <li class="card step reveal" style="--d:.3s"><span class="num">4</span><h3>Launch</h3><p>Hit the button. Live on the board in 60 seconds. Free.</p></li>
     </ol>
   </section>
 </main>
