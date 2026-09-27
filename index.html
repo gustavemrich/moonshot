@@ -45,7 +45,7 @@
         <a class="btn btn-ghost" href="#board">See the board</a>
       </div>
       <dl class="stats reveal" style="--d:.35s">
-        <div><dt>Coins launched</dt><dd class="count" data-to="14208">0</dd></div>
+        <div><dt>Coins launched</dt><dd class="count" id="stat-launched" data-to="0">0</dd></div>
         <div><dt>Launch fee</dt><dd class="count" data-to="0" data-prefix="$">$0</dd></div>
         <div><dt>Seconds to live</dt><dd class="count" data-to="9">0</dd></div>
       </dl>
@@ -169,11 +169,13 @@
 
 <footer class="footer">
   <p>🌙 <b>MOONSHOT</b> — a free launchpad demo. Not financial advice.</p>
+  <p class="admin-link"><a href="admin.html">Admin panel →</a></p>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
+<script src="store.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

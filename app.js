@@ -4,6 +4,7 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const { load, esc, safeHref } = MoonStore;
 
   /* ── 1. starfield ──────────────────────────────────────── */
   const sky = $('#stars'), sctx = sky.getContext('2d');
@@ -52,6 +53,15 @@
   $$('.reveal').forEach(el => io.observe(el));
 
   /* ── 3. counting stats ─────────────────────────────────── */
+  const statLaunched = $('#stat-launched');
+  const seedStat = () => {
+    if (!statLaunched) return;
+    const n = MoonStore.counts().launched;
+    statLaunched.dataset.to = n;
+    if (statLaunched.dataset.done) statLaunched.textContent = n.toLocaleString();
+  };
+  seedStat();
+
   const cio = new IntersectionObserver((es) => {
     es.forEach(e => {
       if (!e.isIntersecting) return;
@@ -61,7 +71,7 @@
       const tick = (t) => {
         const p = Math.min((t - t0) / dur, 1);
         el.textContent = pre + Math.round(to * (1 - Math.pow(1 - p, 3))).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
+        if (p < 1) requestAnimationFrame(tick); else el.dataset.done = '1';
       };
       requestAnimationFrame(tick);
     });
@@ -135,19 +145,7 @@
   drop.addEventListener('drop', e => readImage(e.dataTransfer.files[0]));
 
   /* live preview */
-  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const linkFields = [['#link-site', '🌐', 'Website'], ['#link-x', '𝕏', 'X'], ['#link-tg', '✈️', 'Telegram']];
-
-  const normalize = (v) => {
-    v = v.trim();
-    if (!v) return '';
-    return /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '');
-  };
-  const safeHref = (v) => {
-    const u = normalize(v);
-    try { const p = new URL(u); return /^https?:$/.test(p.protocol) ? p.href : ''; }
-    catch { return ''; }
-  };
 
   function currentLinks() {
     return linkFields.map(([sel, icon, label]) => {
@@ -171,11 +169,10 @@
   syncPreview();
 
   /* ── 7. storage + board ────────────────────────────────── */
-  const KEY = 'moonshot.coins.v1';
-  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
   const save = (list) => {
-    try { localStorage.setItem(KEY, JSON.stringify(list)); return true; }
-    catch { toast('Storage full — remove a coin first'); return false; }
+    const ok = MoonStore.save(list);
+    if (!ok) toast('Storage full — remove a coin first');
+    return ok;
   };
 
   const grid = $('#coin-grid'), emptyState = $('#empty-state');
@@ -188,12 +185,15 @@
       <div class="coin-top">
         <div class="coin-img">${coin.image ? `<img src="${esc(coin.image)}" alt="" />` : '<span>🌙</span>'}</div>
         <div><h3>${esc(coin.name)}</h3><p class="tick">$${esc(coin.ticker)}</p></div>
-        <span class="badge">${fresh(coin.at) ? 'NEW' : 'LIVE'}</span>
+        <span class="badge ${coin.status === 'launched' ? 'is-live' : 'is-pending'}">${coin.status === 'launched' ? 'LIVE' : 'PENDING'}</span>
       </div>
       ${coin.desc ? `<p class="coin-desc">${esc(coin.desc)}</p>` : ''}
       <div class="coin-links"></div>
       <div class="spark" aria-hidden="true">${'<i></i>'.repeat(12)}</div>`;
-    renderLinks($('.coin-links', el), coin.links || []);
+    const links = [...(coin.links || [])];
+    if (coin.status === 'launched' && coin.launchUrl)
+      links.unshift({ href: coin.launchUrl, icon: '📈', label: 'Live' });
+    renderLinks($('.coin-links', el), links);
     stagger(el);
     $('.del', el).addEventListener('click', () => {
       const list = load().filter(c => c.id !== coin.id);
@@ -201,8 +201,6 @@
     });
     return el;
   }
-  const fresh = (at) => Date.now() - at < 6e4 * 10;
-
   function render() {
     const list = load();
     grid.innerHTML = '';
@@ -214,6 +212,7 @@
     emptyState.hidden = list.length > 0;
   }
   render();
+  MoonStore.onChange(() => { render(); seedStat(); });
 
   /* ── 8. submit ─────────────────────────────────────────── */
   form.addEventListener('submit', (e) => {
@@ -235,13 +234,13 @@
         id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
         name, ticker, desc: descI.value.trim(), image: imageData,
         links: currentLinks().map(({ href, icon, label }) => ({ href, icon, label })),
-        at: Date.now()
+        at: Date.now(), status: 'pending', launchUrl: '', launchedAt: 0
       });
       const stored = save(list);
       btn.classList.remove('loading'); btn.disabled = false;
       if (!stored) return;
 
-      render();
+      seedStat();
       liftOff();
       toast(`🚀 $${ticker} launched — free, as promised!`);
       form.reset(); imageData = '';
