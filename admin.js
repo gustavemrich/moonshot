@@ -118,9 +118,10 @@
 
     const dBtn = act('discord');
     dBtn.addEventListener('click', async () => {
-      if (!MoonDiscord.configured()) return toast('Add a Discord webhook URL above first');
+      if (!MoonDiscord.configured() && !(await MoonDiscord.hasRelay()))
+        return toast('Add a Discord webhook URL above first');
       dBtn.disabled = true; dBtn.textContent = '💬 Sending…';
-      try { await MoonDiscord.send(c); toast(`Posted $${c.ticker} to Discord`); }
+      try { await MoonDiscord.deliver(c); toast(`Posted $${c.ticker} to Discord`); }
       catch (err) { toast(err.message || 'Could not reach Discord'); }
       finally { dBtn.disabled = false; dBtn.textContent = '💬 Discord'; }
     });
@@ -223,11 +224,24 @@
   /* ── discord webhook settings ──────────────────────────── */
   const hookUrl = $('#hook-url'), hookAuto = $('#hook-auto'), hookState = $('#hook-state');
 
-  function paintHook() {
+  async function paintHook() {
     const { url, auto } = MoonDiscord.loadCfg();
     hookUrl.value = url;
     hookAuto.checked = auto;
     const ok = MoonDiscord.isValid(url);
+
+    if (await MoonDiscord.hasRelay()) {
+      /* deployed with /api/launch: the server holds the webhook */
+      hookState.textContent = 'handled by the server';
+      hookState.className = 'hook-state is-on';
+      $('.hook-row').style.display = 'none';
+      $('.hook-auto').style.display = 'none';
+      $('.hook-warn').innerHTML =
+        '✅ This site posts to Discord from its own server, using the ' +
+        '<code>DISCORD_WEBHOOK_URL</code> environment variable. Every visitor\'s ' +
+        'submission is posted, and the webhook URL is never exposed to browsers.';
+      return;
+    }
     hookState.textContent = ok ? (auto ? 'connected · auto-posting' : 'connected') : 'not set';
     hookState.className = 'hook-state' + (ok ? ' is-on' : '');
   }
@@ -260,11 +274,12 @@
   });
 
   $('#hook-test').addEventListener('click', async (e) => {
-    if (!MoonDiscord.configured()) return toast('Save a valid webhook URL first');
+    if (!MoonDiscord.configured() && !(await MoonDiscord.hasRelay()))
+      return toast('Save a valid webhook URL first');
     const btn = e.currentTarget;
     btn.disabled = true;
     try {
-      await MoonDiscord.send({
+      await MoonDiscord.deliver({
         name: 'Test Coin', ticker: 'TEST', desc: 'If you can read this, the webhook works. 🌙',
         links: [{ href: 'https://example.com', icon: '🌐', label: 'Website' }],
         image: '', at: Date.now(), status: 'pending', launchUrl: ''

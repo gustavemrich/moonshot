@@ -119,5 +119,51 @@ window.MoonDiscord = (() => {
     return true;
   }
 
-  return { KEY, loadCfg, saveCfg, isValid, configured, send, buildEmbed, dataUrlToBlob };
+  /* ── server relay (Vercel) ───────────────────────────────
+     When /api/launch is deployed, the webhook lives in a server
+     env var and the browser never sees it. A GET answers 405 when
+     the function exists and 404 when it doesn't, so this probes
+     without posting anything. */
+  let relayCache = null;
+  async function hasRelay() {
+    if (relayCache !== null) return relayCache;
+    try {
+      const r = await fetch('api/launch', { method: 'GET' });
+      relayCache = r.status !== 404;
+    } catch { relayCache = false; }
+    return relayCache;
+  }
+
+  async function sendViaRelay(coin) {
+    const res = await fetch('api/launch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: coin.name, ticker: coin.ticker, desc: coin.desc,
+        links: (coin.links || []).map(l => ({ label: l.label, href: l.href })),
+        image: coin.image || ''
+      })
+    });
+    if (res.ok) return true;
+    let msg = `Server relay failed (${res.status})`;
+    try { msg = (await res.json()).error || msg; } catch {}
+    throw new Error(msg);
+  }
+
+  /* server relay if deployed, otherwise this browser's own webhook */
+  async function deliver(coin) {
+    if (await hasRelay()) return sendViaRelay(coin);
+    return send(coin);
+  }
+
+  /* called on every new submission from the public site */
+  async function autoSend(coin) {
+    if (await hasRelay()) return sendViaRelay(coin);
+    const cfg = loadCfg();
+    if (cfg.auto && isValid(cfg.url)) return send(coin);
+    return false;
+  }
+
+  return { KEY, loadCfg, saveCfg, isValid, configured, send, buildEmbed, dataUrlToBlob,
+           hasRelay, sendViaRelay, deliver, autoSend };
 })();

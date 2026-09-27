@@ -22,6 +22,7 @@ python3 -m http.server 8000   # then open http://localhost:8000
 | `app.js` | Public site: starfield, reveals, counters, tilt, form, confetti |
 | `admin.js` | Admin panel: filters, search, status toggles, export/import |
 | `discord.js` | Discord webhook relay, shared by both pages |
+| `api/launch.mjs` | Serverless function that posts to Discord from the server |
 
 ## Admin panel
 
@@ -47,6 +48,13 @@ and only show a Live link — once you mark them so here.
 > `localStorage` as the site, so it's a local workflow tool, not a protected
 > admin area. Anything served publicly would need a real backend and auth.
 
+## Deploying
+
+See **[DEPLOY.md](DEPLOY.md)** for Vercel. In short: import the repo, set a
+`DISCORD_WEBHOOK_URL` environment variable, redeploy. Note that the coin board
+stays per-visitor until the project gets a real database — DEPLOY.md spells out
+what that means.
+
 ## Discord webhook
 
 The admin panel can post coins into a Discord channel — name, ticker, image and
@@ -58,6 +66,13 @@ links, as a purple embed.
    **Send test** confirms it works.
 3. Post a coin with the **💬 Discord** button on its row, or tick
    **Auto-post every new submission** to fire on every launch from the site.
+
+**Deployed on Vercel, this works differently and better.** If `/api/launch` is
+present, the pages route through it instead, and the webhook comes from the
+server's `DISCORD_WEBHOOK_URL` — so every visitor's submission is posted and the
+URL is never exposed to browsers. The admin card then reads *"handled by the
+server"* and hides the URL box. Running locally without the function, it falls
+back to the browser-stored webhook described above.
 
 The image is uploaded as a real file attachment (Discord can't render the
 `data:` URLs coins are stored as). Posts use `allowed_mentions: {parse: []}`, so
