@@ -21,6 +21,7 @@ python3 -m http.server 8000   # then open http://localhost:8000
 | `store.js` | Shared coin store: load/save, migration, URL and HTML escaping |
 | `app.js` | Public site: starfield, reveals, counters, tilt, form, confetti |
 | `admin.js` | Admin panel: filters, search, status toggles, export/import |
+| `discord.js` | Discord webhook relay, shared by both pages |
 
 ## Admin panel
 
@@ -45,6 +46,30 @@ and only show a Live link — once you mark them so here.
 > ⚠️ This panel has **no authentication**. It reads the same browser
 > `localStorage` as the site, so it's a local workflow tool, not a protected
 > admin area. Anything served publicly would need a real backend and auth.
+
+## Discord webhook
+
+The admin panel can post coins into a Discord channel — name, ticker, image and
+links, as a purple embed.
+
+1. In Discord: **Server Settings → Integrations → Webhooks → New Webhook**, pick
+   a channel, then **Copy Webhook URL**.
+2. Paste it into the Discord card in the admin panel and hit **Save**.
+   **Send test** confirms it works.
+3. Post a coin with the **💬 Discord** button on its row, or tick
+   **Auto-post every new submission** to fire on every launch from the site.
+
+The image is uploaded as a real file attachment (Discord can't render the
+`data:` URLs coins are stored as). Posts use `allowed_mentions: {parse: []}`, so
+text in a submission can never trigger an `@everyone` ping. Only genuine
+`discord.com` webhook URLs are accepted, so a typo can't ship submissions to
+someone else's server.
+
+> ⚠️ The webhook URL is saved in `localStorage` (key `moonshot.webhook.v1`) and
+> is never committed — but anything in the browser is readable by anyone with
+> access to that machine, and a leaked webhook URL lets anyone post to your
+> channel. Delete it in Discord if that happens. For a public deployment, a
+> webhook belongs on a server, not in page JavaScript.
 
 ## Animations
 

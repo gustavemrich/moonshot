@@ -242,6 +242,12 @@
 
       seedStat();
       liftOff();
+
+      /* fire-and-forget: a webhook problem must never block a launch */
+      const cfg = window.MoonDiscord && MoonDiscord.loadCfg();
+      if (cfg && cfg.auto && MoonDiscord.isValid(cfg.url)) {
+        MoonDiscord.send(load()[0]).catch(() => toast('Coin saved, but Discord post failed'));
+      }
       toast(`🚀 $${ticker} launched — free, as promised!`);
       form.reset(); imageData = '';
       preview.hidden = true; drop.classList.remove('has-img');

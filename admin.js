@@ -68,6 +68,7 @@
       <div class="acoin-actions">
         <button class="btn btn-ghost sm" data-act="copy" type="button">📋 Copy details</button>
         <button class="btn btn-ghost sm" data-act="img" type="button" ${c.image ? '' : 'disabled'}>🖼️ Image</button>
+        <button class="btn btn-ghost sm" data-act="discord" type="button">💬 Discord</button>
         <label class="launch-url">
           <span>Live link</span>
           <input type="url" data-act="url" value="${esc(c.launchUrl)}" placeholder="https://dex…/${esc(c.ticker)}" />
@@ -113,6 +114,15 @@
       const next = live ? 'pending' : 'launched';
       update(c.id, { status: next, launchedAt: next === 'launched' ? Date.now() : 0 });
       toast(next === 'launched' ? `🚀 $${c.ticker} marked live` : `$${c.ticker} back in the queue`);
+    });
+
+    const dBtn = act('discord');
+    dBtn.addEventListener('click', async () => {
+      if (!MoonDiscord.configured()) return toast('Add a Discord webhook URL above first');
+      dBtn.disabled = true; dBtn.textContent = '💬 Sending…';
+      try { await MoonDiscord.send(c); toast(`Posted $${c.ticker} to Discord`); }
+      catch (err) { toast(err.message || 'Could not reach Discord'); }
+      finally { dBtn.disabled = false; dBtn.textContent = '💬 Discord'; }
     });
 
     act('del').addEventListener('click', () => {
@@ -208,6 +218,60 @@
     };
     fr.readAsText(f);
     fileIn.value = '';
+  });
+
+  /* ── discord webhook settings ──────────────────────────── */
+  const hookUrl = $('#hook-url'), hookAuto = $('#hook-auto'), hookState = $('#hook-state');
+
+  function paintHook() {
+    const { url, auto } = MoonDiscord.loadCfg();
+    hookUrl.value = url;
+    hookAuto.checked = auto;
+    const ok = MoonDiscord.isValid(url);
+    hookState.textContent = ok ? (auto ? 'connected · auto-posting' : 'connected') : 'not set';
+    hookState.className = 'hook-state' + (ok ? ' is-on' : '');
+  }
+  paintHook();
+
+  $('#hook-save').addEventListener('click', () => {
+    const url = hookUrl.value.trim();
+    if (url && !MoonDiscord.isValid(url))
+      return toast("That doesn't look like a Discord webhook URL");
+    MoonDiscord.saveCfg({ url, auto: hookAuto.checked });
+    paintHook();
+    toast(url ? 'Webhook saved' : 'Webhook cleared');
+  });
+
+  $('#hook-show').addEventListener('click', () => {
+    hookUrl.type = hookUrl.type === 'password' ? 'text' : 'password';
+  });
+
+  hookAuto.addEventListener('change', () => {
+    const cfg = MoonDiscord.loadCfg();
+    MoonDiscord.saveCfg({ ...cfg, auto: hookAuto.checked });
+    paintHook();
+    toast(hookAuto.checked ? 'Auto-posting on' : 'Auto-posting off');
+  });
+
+  $('#hook-clear').addEventListener('click', () => {
+    MoonDiscord.saveCfg({ url: '', auto: false });
+    paintHook();
+    toast('Webhook forgotten');
+  });
+
+  $('#hook-test').addEventListener('click', async (e) => {
+    if (!MoonDiscord.configured()) return toast('Save a valid webhook URL first');
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try {
+      await MoonDiscord.send({
+        name: 'Test Coin', ticker: 'TEST', desc: 'If you can read this, the webhook works. 🌙',
+        links: [{ href: 'https://example.com', icon: '🌐', label: 'Website' }],
+        image: '', at: Date.now(), status: 'pending', launchUrl: ''
+      });
+      toast('Test posted — check your channel');
+    } catch (err) { toast(err.message || 'Could not reach Discord'); }
+    finally { btn.disabled = false; }
   });
 
   $('#clear').addEventListener('click', () => {

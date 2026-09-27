@@ -54,6 +54,29 @@
     </div>
   </section>
 
+  <section class="card hook reveal" style="--d:.1s">
+    <div class="hook-head">
+      <h3>💬 Discord webhook <span class="hook-state" id="hook-state">not set</span></h3>
+      <p>Post each coin — name, ticker, image and links — straight into a channel.</p>
+    </div>
+    <div class="hook-row">
+      <input id="hook-url" type="password" placeholder="https://discord.com/api/webhooks/…" aria-label="Discord webhook URL" autocomplete="off" />
+      <button class="btn btn-ghost sm" id="hook-show" type="button" aria-label="Show or hide the webhook URL">👁</button>
+      <button class="btn btn-primary sm" id="hook-save" type="button">Save</button>
+      <button class="btn btn-ghost sm" id="hook-test" type="button">Send test</button>
+      <button class="btn btn-ghost sm danger" id="hook-clear" type="button">Forget</button>
+    </div>
+    <label class="hook-auto">
+      <input type="checkbox" id="hook-auto" />
+      <span>Auto-post every new submission from the site</span>
+    </label>
+    <p class="hook-warn">
+      🔒 Stored in this browser only and never committed to the repo — but anything in a
+      browser is readable by anyone at this machine. Treat it as public, and delete the
+      webhook in Discord if it leaks.
+    </p>
+  </section>
+
   <section class="admin-list" id="list" aria-live="polite"></section>
   <p class="empty" id="admin-empty" hidden>Nothing here yet — <a href="index.html#launch">launch a coin on the site</a>.</p>
 
@@ -66,6 +89,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="store.js"></script>
+<script src="discord.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>
