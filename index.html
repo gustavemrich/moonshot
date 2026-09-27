@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Moonshot — Free Launchpad</title>
+<meta name="description" content="Launch your coin to the moon. Free, instant, purple." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="grid-floor" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="#top">
+    <span class="brand-mark" aria-hidden="true">🌙</span>
+    <span class="brand-text">MOON<b>SHOT</b></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#launch">Launch</a>
+    <a href="#board">Board</a>
+    <a href="#how">How it works</a>
+  </nav>
+  <a class="btn btn-ghost pulse" href="#launch">Launch free →</a>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow reveal"><span class="dot"></span> Zero fees · instant listing · no code</p>
+      <h1 class="reveal" style="--d:.05s">
+        <span class="line"><span>Send your coin</span></span>
+        <span class="line"><span class="grad">to the moon.</span></span>
+      </h1>
+      <p class="lede reveal" style="--d:.15s">
+        Drop an image, a name, a ticker and your links. Hit launch. Your token
+        hits the board in seconds — <b>completely free</b>, forever.
+      </p>
+      <div class="hero-cta reveal" style="--d:.25s">
+        <a class="btn btn-primary shine" href="#launch">🚀 Launch a coin</a>
+        <a class="btn btn-ghost" href="#board">See the board</a>
+      </div>
+      <dl class="stats reveal" style="--d:.35s">
+        <div><dt>Coins launched</dt><dd class="count" data-to="14208">0</dd></div>
+        <div><dt>Launch fee</dt><dd class="count" data-to="0" data-prefix="$">$0</dd></div>
+        <div><dt>Seconds to live</dt><dd class="count" data-to="9">0</dd></div>
+      </dl>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <div class="orbit">
+        <div class="moon"><span class="crater c1"></span><span class="crater c2"></span><span class="crater c3"></span></div>
+        <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+        <div class="sat s1">🪐</div><div class="sat s2">✦</div><div class="sat s3">💎</div>
+        <div class="rocket">🚀<span class="flame"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="marquee" class="marquee" aria-label="Trending tickers">
+    <div class="marquee-track">
+      <span>$MOON ▲ 412%</span><span>$PURP ▲ 88%</span><span>$LAMBO ▲ 1204%</span>
+      <span>$WAGMI ▲ 33%</span><span>$APE ▲ 17%</span><span>$ORBIT ▲ 260%</span>
+      <span>$VIBE ▲ 74%</span><span>$GM ▲ 9%</span>
+      <span>$MOON ▲ 412%</span><span>$PURP ▲ 88%</span><span>$LAMBO ▲ 1204%</span>
+      <span>$WAGMI ▲ 33%</span><span>$APE ▲ 17%</span><span>$ORBIT ▲ 260%</span>
+      <span>$VIBE ▲ 74%</span><span>$GM ▲ 9%</span>
+    </div>
+  </section>
+
+  <section id="launch" class="launch">
+    <div class="section-head reveal">
+      <h2>Launch your coin <span class="grad">free</span></h2>
+      <p>Four fields. No wallet, no gas, no gatekeepers.</p>
+    </div>
+
+    <div class="launch-grid">
+      <form class="card form reveal" id="launch-form" novalidate>
+        <div class="field">
+          <label for="image">Coin image</label>
+          <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose or drop an image">
+            <input type="file" id="image" accept="image/*" hidden />
+            <img id="preview" alt="" hidden />
+            <div class="drop-empty">
+              <span class="drop-icon">🖼️</span>
+              <b>Drop an image</b>
+              <small>or click to browse · PNG, JPG, GIF, SVG</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" type="text" placeholder="Moon Doge" maxlength="32" required />
+            <small class="hint" data-for="name"></small>
+          </div>
+          <div class="field">
+            <label for="ticker">Ticker</label>
+            <div class="ticker-wrap">
+              <span class="prefix">$</span>
+              <input id="ticker" type="text" placeholder="MOON" maxlength="10" required />
+            </div>
+            <small class="hint" data-for="ticker"></small>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="desc">Description <span class="opt">optional</span></label>
+          <textarea id="desc" rows="3" maxlength="240" placeholder="The most purple coin in the galaxy."></textarea>
+          <small class="counter"><span id="desc-count">0</span>/240</small>
+        </div>
+
+        <fieldset class="field links">
+          <legend>Links <span class="opt">optional</span></legend>
+          <label class="ln"><span aria-hidden="true">🌐</span><input id="link-site" type="url" placeholder="https://yourcoin.xyz" /></label>
+          <label class="ln"><span aria-hidden="true">𝕏</span><input id="link-x" type="text" placeholder="x.com/yourcoin" /></label>
+          <label class="ln"><span aria-hidden="true">✈️</span><input id="link-tg" type="text" placeholder="t.me/yourcoin" /></label>
+        </fieldset>
+
+        <button class="btn btn-primary btn-launch shine" type="submit">
+          <span class="btn-label">🚀 Launch for free</span>
+        </button>
+        <p class="fineprint">Saved in your browser. Nothing is charged, ever.</p>
+      </form>
+
+      <aside class="card preview-card reveal" style="--d:.1s" aria-live="polite">
+        <div class="preview-head"><span class="led"></span> Live preview</div>
+        <article class="coin tilt" id="live-coin">
+          <div class="coin-top">
+            <div class="coin-img" id="pv-img"><span>🌙</span></div>
+            <div>
+              <h3 id="pv-name">Your Coin</h3>
+              <p class="tick" id="pv-ticker">$TICKER</p>
+            </div>
+            <span class="badge">NEW</span>
+          </div>
+          <p class="coin-desc" id="pv-desc">Your description shows up right here.</p>
+          <div class="coin-links" id="pv-links"></div>
+          <div class="spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </article>
+      </aside>
+    </div>
+  </section>
+
+  <section id="board" class="board">
+    <div class="section-head reveal">
+      <h2>The <span class="grad">board</span></h2>
+      <p>Freshly launched coins, newest first.</p>
+    </div>
+    <div class="coin-grid" id="coin-grid"></div>
+    <p class="empty" id="empty-state">No coins yet — <a href="#launch">be the first to launch</a>.</p>
+  </section>
+
+  <section id="how" class="how">
+    <div class="section-head reveal"><h2>How it <span class="grad">works</span></h2></div>
+    <ol class="steps">
+      <li class="card step reveal"><span class="num">1</span><h3>Upload</h3><p>Pick an image that deserves to be a coin.</p></li>
+      <li class="card step reveal" style="--d:.1s"><span class="num">2</span><h3>Name it</h3><p>Name, ticker, and a line of lore.</p></li>
+      <li class="card step reveal" style="--d:.2s"><span class="num">3</span><h3>Link it</h3><p>Site, X, Telegram — however you want to be found.</p></li>
+      <li class="card step reveal" style="--d:.3s"><span class="num">4</span><h3>Launch</h3><p>Hit the button. You're on the board. Free.</p></li>
+    </ol>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>🌙 <b>MOONSHOT</b> — a free launchpad demo. Not financial advice.</p>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script src="app.js"></script>
+</body>
+</html>
