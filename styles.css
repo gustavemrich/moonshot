@@ -410,3 +410,29 @@ input::placeholder,textarea::placeholder{color:#7f6ba3}
   45%{transform:scale(1.22) rotate(4deg)}
   100%{transform:scale(1) rotate(0); opacity:1}
 }
+
+/* ── X / Twitter links ─────────────────────────────────────── */
+.x-link{
+  display:grid; place-items:center; width:40px; height:40px; flex:none;
+  border-radius:50%; color:var(--p4);
+  background:rgba(192,132,252,.1); border:1px solid var(--line);
+  transition:transform .3s var(--ease), background .3s, color .3s, box-shadow .3s;
+}
+.x-link svg{width:17px; height:17px}
+.x-link:hover,.x-link:focus-visible{
+  color:#180527; background:linear-gradient(120deg,var(--p1),var(--accent));
+  border-color:transparent; transform:translateY(-3px) scale(1.08) rotate(-8deg);
+  box-shadow:0 12px 30px rgba(192,132,252,.5); outline:none;
+}
+.footer-social{margin:0 0 4px}
+.x-follow{
+  display:inline-flex; align-items:center; gap:9px; padding:10px 18px; border-radius:999px;
+  color:var(--p4); background:rgba(192,132,252,.1); border:1px solid var(--line); font-weight:600;
+  transition:transform .3s var(--ease), background .3s, color .3s, box-shadow .3s;
+}
+.x-follow svg{width:15px; height:15px}
+.x-follow:hover,.x-follow:focus-visible{
+  color:#180527; background:linear-gradient(120deg,var(--p1),var(--accent));
+  border-color:transparent; transform:translateY(-3px); box-shadow:0 14px 34px rgba(192,132,252,.45); outline:none;
+}
+@media (max-width:620px){ .x-link{width:36px; height:36px} }
